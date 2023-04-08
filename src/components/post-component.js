@@ -1,6 +1,8 @@
 import appConstants from "../common/constants";
 import { goTo } from '../router'
 import { randomColor, invertColor, getUserInitials, highlightText } from '../common/utils'
+import { getPost } from '../service/posts'
+
 
 class PostComponent extends HTMLElement {
     constructor() {
@@ -15,7 +17,7 @@ class PostComponent extends HTMLElement {
         <div class="post-text"></div>
         <div class="post-user">
             <user-avatar small="true"></user-avatar>
-            <div class="post-name"></div>
+            <div class="user-name"></div>
         </div>
         `
 
@@ -82,18 +84,19 @@ class PostComponent extends HTMLElement {
             text.textContent = post.text
         }
 
-        text.addEventListener('clock', (e) => {
+        text.addEventListener('click', (e) => {
             e.stopPropagation()
-            //goto post
-            //const url =
+            //goto post 
+            //const url = 
             //goTo(url)
         })
 
         const user = shadow.querySelector('.post-user')
-        const userAvatar = shadow.querySelector('.post-avatar')
+        const userAvatar = shadow.querySelector('user-avatar')
+        // debugger
         userAvatar.setAttribute('user-name', post.user.user_name)
 
-        const userName = shadow.querySelector('user-name')
+        const userName = shadow.querySelector('.user-name')
         userName.textContent = post.user.user_fullname
 
         user.addEventListener('click', (e) => {

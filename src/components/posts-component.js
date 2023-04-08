@@ -1,6 +1,8 @@
 import appConstants from "../common/constants";
 import { goTo } from '../router'
 import { randomColor, invertColor, getUserInitials, highlightText } from '../common/utils'
+import { getPost, setPost } from '../service/posts'
+import { getPosts, getPostsSearch, getPostsByUser } from '../api/postsApi'
 
 class PostsComponent extends HTMLElement {
     constructor() {
@@ -21,56 +23,51 @@ class PostsComponent extends HTMLElement {
 
         //pagination
 
-        wrapper.innerHTML = `
-        <div class="post-title"></div>
-        <div class="post-text"></div>
-        <div class="post-user">
-            <user-avatar small="true"></user-avatar>
-            <div class="post-name"></div>
-        </div>
-        `
+        const pagination = document.createElement('pagination-component')
+
+        pagination.setAttribute('class', 'posts-pagination')
+        pagination.setAttribute('page', this.page)
+        pagination.setAttribute('last', this.lastPage)
+
+        pagination.addEventListener('paginate-back', e => {
+            e.stopPropagation()
+            if (this.page > 1) {
+                this.page = this.page - 1
+                this.getPostsPage()
+            }
+        })
+
+        pagination.addEventListener('paginate-next', e => {
+            e.stopPropagation()
+            if (!this.lastPage) {
+                this.page = this.page + 1
+                this.getPostsPage()
+            }
+        })
+
+        shadow.appendChild(pagination)
+
+
 
         const style = document.createElement('style')
 
         style.textContent = `
-        .post-block{
-            max-width: 200px;
-            border-radius: 10px;
-            background-color: #ccc;
-            margin: 10px;
-            padding: 10px;
-        }
-
-        .post-block .post-title{
-            padding: 10px;
-            font-weight: bold;
-        }
-
-        .post-block .post-text{
-            padding: 10px;
-            font-family: fantasy;
-            max-height: 200px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .post-block .post-user{
-            padding: 10px;
-            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-            background-color: #fff;
-            cursor: pointer;
+        .posts-block{
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 5px;
         }
 
-        .user-avatar{
-            margin-right: 10px;
+        .posts-title{
+            text-align: center;
         }
 
-        .highlight{
-            background-color: yellow;
+        .post-pagination{
+            display: flex;
+            justify-content: center;
         }
-
         `
 
         shadow.appendChild(wrapper)
@@ -80,41 +77,66 @@ class PostsComponent extends HTMLElement {
 
     connectedCallback() {
         const shadow = this.shadowRoot
-        const id = this.getAttribute('id')
+        const userId = this.getAttribute('user')
         const search = this.getAttribute('search')
-        const post = getPost(id)
 
-        const title = shadow.querySelector('.post-title')
-        title.textContent = post.title
-        const text = shadow.querySelector('.post-text')
         if (search) {
-            text.innerHTML = highlightText(post.text, search)
-        } else {
-            text.textContent = post.text
+            this.search = search
         }
 
-        text.addEventListener('clock', (e) => {
-            e.stopPropagation()
-            //goto post
-            //const url =
-            //goTo(url)
-        })
+        const wrapper = shadow.querySelector('.posta-block')
+        const title = shadow.querySelector('.posts-title')
 
-        const user = shadow.querySelector('.post-user')
-        const userAvatar = shadow.querySelector('.post-avatar')
-        userAvatar.setAttribute('user-name', post.user.user_name)
+        title.textContent = 'All posts'
 
-        const userName = shadow.querySelector('user-name')
-        userName.textContent = post.user.user_fullname
+        if (userId) {
+            title.textContent = "Users' posts"
+        }
 
-        user.addEventListener('click', (e) => {
-            //goto post
-            //const url =
-            //goTo(url)
-        })
-
+        this.getPostsPage()
     }
 
+    static get observedAttributes() {
+        return ['search']
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'search') {
+            this.search = newValue
+            this.getPostsPage()
+        }
+    }
+
+    getPostsPage() {
+        const shadow = this.shadowRoot
+        const userId = this.getAttribute('user')
+        const wrapper = shadow.querySelector('.posts-block')
+        const pagination = shadow.querySelector('.posts-pagination')
+
+        pagination.setAttribute('page', this.page)
+        pagination.setAttribute('last', this.lastPage)
+
+
+        wrapper.innerHTML = ''
+
+        const apiCall = this.search ? getPostsSearch(this.search, this.page)
+            : userId ? getPostsByUser(userId, this.page) : getPosts(this.page)
+
+        apiCall.then(posts => {
+            this.lastPage = posts.length < 10
+            posts.forEach(post => {
+                setPost(post)
+                const postElement = document.createElement('post-component')
+                postElement.setAttribute('id', post.id)
+                if (this.search) {
+                    postElement.setAttribute('search', this.search)
+                }
+                wrapper.appendChild(postElement)
+            });
+        })
+            .catch(error => console.log('error', error))
+
+    }
 
 }
 

@@ -28,7 +28,7 @@ class Pagination extends HTMLElement {
         btnNext.textContent = 'Next >'
         btnNext.addEventListener('click', (e) => {
             e.stopPropagation()
-            if (this.page > 1) {
+            if (!this.lastPage) {
                 const event = new CustomEvent('paginate-next')
                 this.dispatchEvent(event)
             }
@@ -108,4 +108,4 @@ class Pagination extends HTMLElement {
 
 }
 
-customElements.define('pagination', Pagination)
+customElements.define('pagination-component', Pagination)
