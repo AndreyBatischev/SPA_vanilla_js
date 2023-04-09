@@ -8,6 +8,8 @@ import UsersPage from '../pages/users.template'
 export const routes = {
     Main: new Route(appConstants.routes.index),
     Posts: new Route(appConstants.routes.posts),
+    PostsSearch: new Route(appConstants.routes.postsSearch),
+    UsersSearch: new Route(appConstants.routes.usersSearch),
     Users: new Route(appConstants.routes.users),
 }
 
@@ -18,6 +20,10 @@ export const render = path => {
         result = MainPage()
     } else if (routes.Posts.match(path)) {
         result = PostsPage()
+    } else if (routes.PostsSearch.match(path)) {
+        result = PostsPage(routes.PostsSearch.match(path))
+    } else if (routes.UsersSearch.match(path)) {
+        result = UsersPage(routes.UsersSearch.match(path))
     } else if (routes.Users.match(path)) {
         result = UsersPage()
     }

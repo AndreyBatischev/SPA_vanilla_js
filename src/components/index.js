@@ -2,6 +2,7 @@ import './link-components'
 import './nav-components'
 import './user-avatar'
 import './post-component'
-import './posts-component'
+import './user-component'
+import './list-component'
 import './pagination-component'
 
