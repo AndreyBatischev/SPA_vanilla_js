@@ -4,16 +4,16 @@ import { getComment } from '../service/comments'
 
 
 class CommentComponent extends HTMLElement {
-    constructor() {
+  constructor() {
 
-        super();
+    super();
 
-        const shadow = this.attachShadow({ mode: 'open' });
-        const wrapper = document.createElement('div')
-        wrapper.setAttribute('class', 'comment-block');
+    const shadow = this.attachShadow({ mode: 'open' });
+    const wrapper = document.createElement('div')
+    wrapper.setAttribute('class', 'comment-block');
 
-        wrapper.innerHTML = `
-        div class="comment-text"></div>
+    wrapper.innerHTML = `
+        <div class="comment-text"></div>
         <div class="bottom-block">
             <div class="comment-user">
             <div class="comment-user-details">
@@ -25,8 +25,8 @@ class CommentComponent extends HTMLElement {
         </div>`
 
 
-        const style = document.createElement('style');
-        style.textContent = `
+    const style = document.createElement('style');
+    style.textContent = `
       .comment-block {
           max-width: 300px;
           border-radius: 10px;
@@ -83,53 +83,53 @@ class CommentComponent extends HTMLElement {
 
     `
 
-        shadow.appendChild(style);
-        shadow.appendChild(wrapper);
+    shadow.appendChild(style);
+    shadow.appendChild(wrapper);
 
+  }
+
+  connectedCallback() {
+
+    const shadow = this.shadowRoot;
+
+    const id = this.getAttribute('id')
+    const comment = getComment(id)
+
+    const showPostButton = this.getAttribute('post-btn')
+    if (showPostButton) {
+      const postButton = document.createElement('button')
+      postButton.setAttribute('class', 'post-button')
+      postButton.textContent = 'Open post'
+      postButton.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const url = routes.Post.reverse({ post: comment.post.id })
+        goTo(url)
+      })
+      const bottomBlock = shadow.querySelector('.bottom-block')
+      bottomBlock.appendChild(postButton)
     }
 
-    connectedCallback() {
 
-        const shadow = this.shadowRoot;
+    const text = shadow.querySelector('.comment-text')
+    text.textContent = comment.text
 
-        const id = this.getAttribute('id')
-        const comment = getComment(id)
+    const user = shadow.querySelector('.comment-user')
 
-        const showPostButton = this.getAttribute('post-btn')
-        if (showPostButton) {
-            const postButton = document.createElement('button')
-            postButton.setAttribute('class', 'post-button')
-            postButton.textContent = 'Open post'
-            postButton.addEventListener('click', (e) => {
-                e.stopPropagation()
-                const url = routes.Post.reverse({ post: comment.post.id })
-                goTo(url)
-            })
-            const bottomBlock = shadow.querySelector('.bottom-block')
-            bottomBlock.appendChild(postButton)
-        }
+    const userAvatar = shadow.querySelector('user-avatar')
+    userAvatar.setAttribute('user-name', comment.user.user_name)
+    const userName = shadow.querySelector('.user-name')
+    userName.textContent = comment.user.user_fullname
 
+    user.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const url = routes.User.reverse({ user: comment.user.id })
+      goTo(url)
+    })
 
-        const text = shadow.querySelector('.comment-text')
-        text.textContent = comment.text
+    const commentDate = shadow.querySelector('date-formatted')
+    commentDate.setAttribute('date', comment.createdAt)
 
-        const user = shadow.querySelector('.comment-user')
-
-        const userAvatar = shadow.querySelector('user-avatar')
-        userAvatar.setAttribute('user-name', comment.user.user_name)
-        const userName = shadow.querySelector('.user-name')
-        userName.textContent = comment.user.user_fullname
-
-        user.addEventListener('click', (e) => {
-            e.stopPropagation()
-            const url = routes.User.reverse({ user: comment.user.id })
-            goTo(url)
-        })
-
-        const commentDate = shadow.querySelector('date-formatted')
-        commentDate.setAttribute('date', comment.createdAt)
-
-    }
+  }
 
 }
 
