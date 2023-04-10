@@ -4,7 +4,7 @@ export const getUsers = (page) => {
     return baseApi.get(`/users?_page=${page}&limit=10`)
 }
 
-export const getUsersById = (userId) => {
+export const getUserById = (userId) => {
     return baseApi.get(`/users?userId=${userId}`)
 }
 
@@ -14,6 +14,6 @@ export const getUsersSearch = (search, page) => {
 
 export default {
     getUsers,
-    getUsersById,
+    getUserById,
     getUsersSearch,
 }

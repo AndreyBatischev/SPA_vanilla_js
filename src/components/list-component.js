@@ -1,10 +1,12 @@
-import appConstants from "../common/constants";
+import appConstants from '../common/constants'
 import { goTo } from '../router'
 import { randomColor, invertColor, getUserInitials, highlightText } from '../common/utils'
 import { getPost, setPost } from '../service/posts'
 import { getUser, setUser } from '../service/users'
-import { getPosts, getPostsSearch, getPostsByUser } from '../api/postsApi'
+import { getPosts, getPostsByUser, getPostsSearch } from '../api/postsApi'
 import { getUsers, getUsersSearch } from '../api/usersApi'
+import { getCommentsByPost, getCommentsByUser, getCommentsSearch } from '../api/commentsApi'
+import { setComment } from '../service/comments'
 
 class ListComponent extends HTMLElement {
     constructor() {
@@ -12,11 +14,9 @@ class ListComponent extends HTMLElement {
         this.search = '';
         this.page = 1;
         this.lastPage = false;
-        this.typeList = appConstants.lists.types.post
-
+        this.typeList = appConstants.lists.types.post;
 
         const shadow = this.attachShadow({ mode: 'open' })
-
         const wrapper = document.createElement('div')
         wrapper.setAttribute('class', 'list-block')
 
@@ -25,14 +25,12 @@ class ListComponent extends HTMLElement {
         shadow.appendChild(title)
 
         //pagination
-
         const pagination = document.createElement('pagination-component')
-
         pagination.setAttribute('class', 'list-pagination')
         pagination.setAttribute('page', this.page)
         pagination.setAttribute('last', this.lastPage)
 
-        pagination.addEventListener('paginate-back', e => {
+        pagination.addEventListener('paginate-back', (e) => {
             e.stopPropagation()
             if (this.page > 1) {
                 this.page = this.page - 1
@@ -42,10 +40,13 @@ class ListComponent extends HTMLElement {
                 if (this.typeList === appConstants.lists.types.user) {
                     this.getUsersPage()
                 }
+                if (this.typeList === appConstants.lists.types.comment) {
+                    this.getCommentsPage()
+                }
             }
         })
 
-        pagination.addEventListener('paginate-next', e => {
+        pagination.addEventListener('paginate-next', (e) => {
             e.stopPropagation()
             if (!this.lastPage) {
                 this.page = this.page + 1
@@ -55,37 +56,39 @@ class ListComponent extends HTMLElement {
                 if (this.typeList === appConstants.lists.types.user) {
                     this.getUsersPage()
                 }
+                if (this.typeList === appConstants.lists.types.comment) {
+                    this.getCommentsPage()
+                }
+
             }
         })
-
         shadow.appendChild(pagination)
-
-
 
         const style = document.createElement('style')
 
         style.textContent = `
-        .list-block{
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 5px;
-        }
+           
+           .list-block{
+               display: flex;
+               align-items: flex-start;
+               justify-content: center;
+               flex-wrap: wrap;
+               padding: 5px;
+           }
 
-        .list-title{
-            text-align: center;
-        }
+           .list-title{
+               text-align: center;
+           }
 
-        .post-pagination{
+           .list-pagination{
             display: flex;
             justify-content: center;
-        }
+           }
+
         `
 
-        shadow.appendChild(wrapper)
         shadow.appendChild(style)
-
+        shadow.appendChild(wrapper)
     }
 
     connectedCallback() {
@@ -93,18 +96,11 @@ class ListComponent extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['search', 'list-type']
+        return ['search']
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'search') {
-            this.search = newValue
-            this.updateComponent()
-        }
-        if (name === 'list-type') {
-            this.typeList = newValue
-            this.updateComponent()
-        }
+        this.updateComponent()
     }
 
     updateComponent() {
@@ -124,20 +120,14 @@ class ListComponent extends HTMLElement {
         const title = shadow.querySelector('.list-title')
 
         if (this.typeList === appConstants.lists.types.post) {
-            title.textContent = 'All posts'
-
-            if (userId) {
-                title.textContent = "Users' posts"
-            }
-
             this.getPostsPage()
         }
-
         if (this.typeList === appConstants.lists.types.user) {
-            title.textContent = 'All posts'
             this.getUsersPage()
         }
-
+        if (this.typeList === appConstants.lists.types.comment) {
+            this.getCommentsPage()
+        }
 
     }
 
@@ -146,19 +136,25 @@ class ListComponent extends HTMLElement {
         const userId = this.getAttribute('user')
         const wrapper = shadow.querySelector('.list-block')
         const pagination = shadow.querySelector('pagination-component')
-        // const pagination = shadow.querySelector('.posts-pagination')
-
         pagination.setAttribute('page', this.page)
         pagination.setAttribute('last', this.lastPage)
 
+        const title = shadow.querySelector('.list-title')
+        title.textContent = 'All posts'
 
-        wrapper.innerHTML = ''
+        if (userId) {
+            title.textContent = "Users' posts"
+        }
 
-        const apiCall = this.search ? getPostsSearch(this.search, this.page)
-            : userId ? getPostsByUser(userId, this.page) : getPosts(this.page)
+        const apiCall = this.search ? getPostsSearch(this.search, this.page) :
+            userId ? getPostsByUser(userId, this.page) : getPosts(this.page)
 
         apiCall.then(posts => {
+
             this.lastPage = posts.length < 10
+            const count = posts.length
+            pagination.setAttribute('last', this.lastPage)
+            wrapper.innerHTML = ''
             posts.forEach(post => {
                 setPost(post)
                 const postElement = document.createElement('post-component')
@@ -168,8 +164,12 @@ class ListComponent extends HTMLElement {
                 }
                 wrapper.appendChild(postElement)
             });
+            if (count === 0 && this.page === 1) {
+                //no data
+                wrapper.innerHTML = '<h3>No posts yet</h3>'
+            }
         })
-            .catch(error => console.log('error', error))
+            .catch(error => console.log(error))
 
     }
 
@@ -178,30 +178,87 @@ class ListComponent extends HTMLElement {
         const userId = this.getAttribute('user')
         const wrapper = shadow.querySelector('.list-block')
         const pagination = shadow.querySelector('pagination-component')
-        // const pagination = shadow.querySelector('.posts-pagination')
-
         pagination.setAttribute('page', this.page)
         pagination.setAttribute('last', this.lastPage)
 
-
-        wrapper.innerHTML = ''
+        const title = shadow.querySelector('.list-title')
+        title.textContent = 'All users'
 
         const apiCall = this.search ? getUsersSearch(this.search, this.page)
             : getUsers(this.page)
 
         apiCall.then(users => {
             this.lastPage = users.length < 10
+            pagination.setAttribute('last', this.lastPage)
+            wrapper.innerHTML = ''
             users.forEach(user => {
                 setUser(user)
-                const postElement = document.createElement('user-component')
-                postElement.setAttribute('id', user.id)
+                const userElement = document.createElement('user-component')
+                userElement.setAttribute('id', user.id)
                 if (this.search) {
-                    postElement.setAttribute('search', this.search)
+                    userElement.setAttribute('search', this.search)
                 }
-                wrapper.appendChild(postElement)
+                wrapper.appendChild(userElement)
             });
         })
-            .catch(error => console.log('error', error))
+            .catch(error => console.log(error))
+
+    }
+
+    getCommentsPage() {
+        const shadow = this.shadowRoot
+        const userId = this.getAttribute('user')
+        const postId = this.getAttribute('post')
+        const wrapper = shadow.querySelector('.list-block')
+        const pagination = shadow.querySelector('pagination-component')
+        const title = shadow.querySelector('.list-title')
+
+        title.textContent = 'All comments'
+        if (userId) {
+            title.textContent = "User's comments"
+        }
+        if (postId) {
+            title.textContent = "Post's comments"
+        }
+
+        pagination.setAttribute('page', this.page)
+        pagination.setAttribute('last', this.lastPage)
+
+
+        const apiCall = this.search ?
+            getCommentsSearch(this.search, this.page) :
+            (userId ?
+                getCommentsByUser(userId, this.page) :
+                (postId ?
+                    getCommentsByPost(postId, this.page) :
+                    null))
+
+        if (apiCall) {
+            apiCall.then(comments => {
+                const count = comments.length
+                this.lastPage = count < 10
+                pagination.setAttribute('last', this.lastPage)
+                wrapper.innerHTML = ''
+                comments.forEach(comment => {
+                    setComment(comment)
+                    const commentElement = document.createElement('comment-component')
+                    commentElement.setAttribute('id', comment.id)
+                    if (this.search) {
+                        commentElement.setAttribute('search', this.search)
+                    }
+                    if (userId) {
+                        commentElement.setAttribute('post-btn', 'true')
+                    }
+                    wrapper.appendChild(commentElement)
+                });
+                if (count === 0 && this.page === 1) {
+                    //no data
+                    wrapper.innerHTML = '<h3>No comments yet</h3>'
+                }
+            })
+                .catch(error => console.log(error))
+        }
+
 
     }
 

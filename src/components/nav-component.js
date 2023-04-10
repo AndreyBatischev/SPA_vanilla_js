@@ -58,6 +58,10 @@ class NavComponent extends HTMLElement {
                 e.preventDefault()
                 const text = e.target.value
                 if (text) {
+                    if (text.trim().length < 2) {
+                        alert('Search string must contain at least 2 chars')
+                        return
+                    }
                     if (this.searchType === appConstants.search.types.post) {
                         const url = routes.PostsSearch.reverse({ query: text })
                         goTo(url)

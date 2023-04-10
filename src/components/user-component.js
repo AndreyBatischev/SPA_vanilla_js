@@ -2,7 +2,7 @@ import appConstants from '../common/constants'
 import { goTo } from '../router'
 import { highlightText } from '../common/utils'
 import { getUser, setUser } from '../service/users'
-import { getUsersById } from '../api/usersApi'
+import { getUserById } from '../api/usersApi'
 
 class UserComponent extends HTMLElement {
     constructor() {
@@ -52,7 +52,7 @@ class UserComponent extends HTMLElement {
         if (user) {
             this.updateUser()
         } else {
-            getUsersById(id).then((user) => {
+            getUserById(id).then((user) => {
                 setUser(user)
                 this.updateUser()
             })

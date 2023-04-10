@@ -8,7 +8,7 @@ export const getPostsByUser = (userId, page) => {
     return baseApi.get(`/posts?userId=${userId}&_page${page}&limit=10&_expand=user`)
 }
 
-export const getPostsById = (postId) => {
+export const getPostById = (postId) => {
     return baseApi.get(`/posts?postId=${postId}&_expand=user`)
 }
 
@@ -19,6 +19,6 @@ export const getPostsSearch = (search, page) => {
 export default {
     getPosts,
     getPostsByUser,
-    getPostsById,
+    getPostById,
     getPostsSearch
 }
