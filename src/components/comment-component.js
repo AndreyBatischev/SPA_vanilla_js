@@ -12,17 +12,16 @@ class CommentComponent extends HTMLElement {
     const wrapper = document.createElement('div')
     wrapper.setAttribute('class', 'comment-block');
 
-    wrapper.innerHTML = `
-        <div class="comment-text"></div>
-        <div class="bottom-block">
-            <div class="comment-user">
-            <div class="comment-user-details">
-                <user-avatar small="true"></user-avatar>
-                <div class="user-name"></div>
-            </div>
-            <date-formatted></date-formatted>
-            </div>
-        </div>`
+    wrapper.innerHTML = `<div class="comment-text"></div>
+    <div class="bottom-block">
+        <div class="comment-user">
+          <div class="comment-user-details">
+              <user-avatar small="true"></user-avatar>
+              <div class="user-name"></div>
+          </div>
+          <date-formatted></date-formatted>
+        </div>
+    </div>`
 
 
     const style = document.createElement('style');

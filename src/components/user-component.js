@@ -44,7 +44,6 @@ class UserComponent extends HTMLElement {
         const user = getUser(id)
         const userAvatar = shadow.querySelector('user-avatar')
 
-
         if (single) {
             const title = shadow.querySelector('.user-title-main')
             title.textContent = 'User info'

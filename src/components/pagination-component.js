@@ -1,12 +1,11 @@
-import appConstants from "../common/constants";
-import { goTo } from '../router'
+import appConstants from '../common/constants'
+import { render } from '../router'
 
 class Pagination extends HTMLElement {
     constructor() {
         super()
         this.page = 1;
         this.lastPage = false;
-
         const shadow = this.attachShadow({ mode: 'open' })
 
         const pagination = document.createElement('div')
@@ -41,23 +40,22 @@ class Pagination extends HTMLElement {
         pagination.appendChild(btnPrev)
         pagination.appendChild(pageLabel)
         pagination.appendChild(btnNext)
-
         shadow.appendChild(pagination)
 
         const style = document.createElement('style')
 
         style.textContent = `
-        .posts-pagination{
-            display: flex;
-            justify-content: center;
+           
+           .posts-pagination{
+               display: flex;
+               justify-content: center;
 
-        }
-
-        .page-label{
-            margin: 0 10px;
-            font-weight: bold;
-            font-family: system-ui;
-        }
+           }
+           .page-label{
+               margin: 0 10px;
+               font-weight: bold;
+               font-family: system-ui;
+           }
         `
 
         shadow.appendChild(style)
@@ -69,7 +67,6 @@ class Pagination extends HTMLElement {
         const nextBtn = shadow.querySelector('.next-button')
         const prevBtn = shadow.querySelector('.prev-button')
         const pageLabel = shadow.querySelector('.page-label')
-
         if (this.page === 1) {
             prevBtn.setAttribute('disabled', true)
         } else {
@@ -81,7 +78,6 @@ class Pagination extends HTMLElement {
             nextBtn.removeAttribute('disabled')
         }
         pageLabel.textContent = `Page ${this.page}`
-
     }
 
     connectedCallback() {
@@ -92,20 +88,15 @@ class Pagination extends HTMLElement {
         return ['page', 'last']
     }
 
-
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'page') {
             this.page = JSON.parse(newValue)
         }
-
         if (name === 'last') {
             this.lastPage = JSON.parse(newValue)
         }
-
         this.updateComponent()
     }
-
-
 }
 
 customElements.define('pagination-component', Pagination)

@@ -1,6 +1,6 @@
 import appConstants from '../common/constants'
 import { goTo } from '../router'
-import { randomColor, invertColor, getUserInitials } from '../common/utils'
+import { randomColor, invertColor, getUserInitials, colorForString } from '../common/utils'
 
 class UserAvatar extends HTMLElement {
     constructor() {
@@ -15,33 +15,6 @@ class UserAvatar extends HTMLElement {
 
         const style = document.createElement('style')
         this.selected = false;
-
-        const bgColor = randomColor()
-        const textColor = invertColor(bgColor)
-
-        style.textContent = `
-           
-           .user-avatar{
-               display: flex;
-               justify-content: center;
-               align-items: center;
-               font-size: 20px;
-               width: 40px;
-               height: 40px;
-               text-transform: uppercase;
-               font-family: fixed;
-               border-radius: 50%;
-               padding: 16px;
-               background-color: ${bgColor};
-               color: ${textColor};
-               margin-right: 5px;
-           }
-           .user-avatar.small{
-               font-size: 10px;
-               width: 10px;
-               height: 10px;
-           }
-        `
 
         shadow.appendChild(style)
         shadow.appendChild(wrapper)
@@ -74,8 +47,10 @@ class UserAvatar extends HTMLElement {
         const userName = this.getAttribute('user-name')
         const small = this.getAttribute('small')
 
+        const style = shadow.querySelector('style')
         const avatar = shadow.querySelector('.user-avatar')
         const text = shadow.querySelector('.avatar-text')
+
 
         if (small) {
             avatar.setAttribute('class', 'user-avatar small')
@@ -85,6 +60,38 @@ class UserAvatar extends HTMLElement {
 
         if (userName) {
             text.textContent = getUserInitials(userName)
+        }
+
+        if (userName) {
+            const bgColor = colorForString(userName)
+            const textColor = invertColor(bgColor)
+
+            style.textContent = `
+               
+               .user-avatar{
+                   display: flex;
+                   justify-content: center;
+                   align-items: center;
+                   font-size: 20px;
+                   width: 40px;
+                   height: 40px;
+                   text-transform: uppercase;
+                   font-family: fixed;
+                   border-radius: 50%;
+                   padding: 16px;
+                   background-color: ${bgColor};
+                   color: ${textColor};
+                   margin-right: 5px;
+               }
+    
+               .user-avatar.small{
+                   font-family: arial;
+                   font-size: 16px;
+                   width: 10px;
+                   height: 10px;
+               }
+    
+            `
         }
     }
 }

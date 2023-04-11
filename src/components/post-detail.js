@@ -21,63 +21,62 @@ class PostDetail extends HTMLElement {
         const wrapper = document.createElement('div')
         wrapper.setAttribute('class', 'post-block');
 
-        wrapper.innerHTML = `
-            <div class="post-title"></div>
-            <div class="post-text"></div>
-                <div class="post-user">
-                <div class="post-user-details">
-                    <user-avatar small="true"></user-avatar>
-                    <div class="user-name"></div>
-                </div>
-            <date-formatted></date-formatted>
-            </div>`
+        wrapper.innerHTML = `<div class="post-title"></div>
+    <div class="post-text"></div>
+    <div class="post-user">
+       <div class="post-user-details">
+          <user-avatar small="true"></user-avatar>
+          <div class="user-name"></div>
+       </div>
+       <date-formatted></date-formatted>
+    </div>`
 
 
         const style = document.createElement('style');
         style.textContent = `
-            .post-block {
-                max-width: 600px;
-                border-radius: 10px;
-                background-color: #ccc;
-                margin: 10px;
-                padding:  10px;
-                margin: auto;
-                }
+      .post-block {
+          max-width: 600px;
+          border-radius: 10px;
+          background-color: #ccc;
+          margin: 10px;
+          padding:  10px;
+          margin: auto;
+        }
 
-            .post-main-title{
-                text-align: center;
-                }
-            
-            .post-block .post-title{
-                padding: 10px;
-                font-weight: bold;
-                }
+        .post-main-title{
+          text-align: center;
+        }
+    
+        .post-block .post-title{
+          padding: 10px;
+          font-weight: bold;
+        }
 
-            .post-block .post-text{
-                padding: 10px;
-                font-family: fantasy;
-                }
+        .post-block .post-text{
+          padding: 10px;
+          font-family: fantasy;
+        }
 
-            .post-block .post-user{
-                padding: 10px;
-                font-family: arial;
-                background-color: #fff;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                }
+        .post-block .post-user{
+          padding: 10px;
+          font-family: arial;
+          background-color: #fff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
-            user-avatar{
-                margin-right: 10px;
-                }
+        user-avatar{
+          margin-right: 10px;
+        }
 
-            .post-block .post-user .post-user-details{
-                display: flex;
-                align-items: center;
-                }
+        .post-block .post-user .post-user-details{
+          display: flex;
+          align-items: center;
+        }
 
-            `
+    `
 
         shadow.appendChild(style)
         shadow.appendChild(wrapper)
