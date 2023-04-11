@@ -200,6 +200,7 @@ class ListComponent extends HTMLElement {
                 }
                 wrapper.appendChild(userElement)
             });
+
         })
             .catch(error => console.log(error))
 
